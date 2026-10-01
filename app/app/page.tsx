@@ -3,198 +3,332 @@
 import { useState } from "react";
 
 export default function Home() {
-  const [preferences, setPreferences] = useState("");
+  const [person1, setPerson1] = useState("");
+  const [person2, setPerson2] = useState("");
+  const [location, setLocation] = useState("");
   const [plan, setPlan] = useState("Weekend Outing");
-  const [result, setResult] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showResult, setShowResult] = useState(false);
 
   const findTasteBridge = () => {
-    if (!preferences.trim()) {
-      setResult("Please tell us what your group likes first.");
+    if (!person1.trim() || !person2.trim()) {
+      alert("Please enter tastes for both people.");
       return;
     }
 
     setLoading(true);
-    setResult("");
+    setShowResult(false);
 
-    // Demo recommendation while Qloo API access is not connected.
+    // Demo mode until live Qloo API access is connected.
     setTimeout(() => {
-      setResult(
-        `For your ${plan}, TasteBridge found a shared direction based on: "${preferences}". Your group may enjoy an experience that combines food, entertainment, and shared cultural interests.`
-      );
-
       setLoading(false);
+      setShowResult(true);
     }, 800);
   };
 
   return (
     <main className="min-h-screen bg-slate-950 text-white">
-      <div className="mx-auto max-w-4xl px-6 py-12">
+      <div className="mx-auto max-w-5xl px-6 py-10">
 
         {/* Header */}
-        <header className="mb-24 flex items-center justify-between">
+        <header className="mb-20 flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold">
-              TasteBridge{" "}
-              <span className="text-purple-400">AI</span>
+              TasteBridge <span className="text-purple-400">AI</span>
             </h1>
 
-            <p className="text-sm text-slate-400">
+            <p className="mt-1 text-sm text-slate-400">
               Cultural intelligence for better group decisions
             </p>
           </div>
 
-          <div className="rounded-full border border-purple-500/40 px-5 py-2 text-purple-300">
+          <div className="rounded-full border border-purple-500/40 px-4 py-2 text-sm text-purple-300">
             Powered by Qloo
           </div>
         </header>
 
         {/* Hero */}
         <section className="text-center">
-          <div className="mb-8 inline-block rounded-full border border-slate-700 px-4 py-2 text-sm text-slate-300">
-            ✨ An agent that understands everyone&apos;s taste
+          <div className="mb-7 inline-block rounded-full border border-slate-700 px-4 py-2 text-sm text-slate-300">
+            ✨ Find the cultural bridge between different tastes
           </div>
 
-          <h2 className="text-5xl font-bold leading-tight">
-            Stop arguing about
+          <h2 className="text-4xl font-bold leading-tight md:text-6xl">
+            Different tastes.
             <br />
-
-            <span className="text-blue-400">
-              where to go next.
-            </span>
+            <span className="text-blue-400">One shared experience.</span>
           </h2>
 
-          <p className="mt-8 text-lg leading-8 text-slate-400">
-            TasteBridge combines different tastes into culturally intelligent
-            recommendations for restaurants, entertainment, travel and more.
+          <p className="mx-auto mt-7 max-w-2xl text-lg leading-8 text-slate-400">
+            Tell TasteBridge what each person enjoys. We&apos;ll find the
+            cultural connection that can bring everyone together.
           </p>
         </section>
 
-        {/* Recommendation Form */}
-        <section className="mt-14 rounded-3xl border border-slate-800 bg-slate-900 p-8">
+        {/* Main Form */}
+        <section className="mt-14 rounded-3xl border border-slate-800 bg-slate-900 p-6 md:p-8">
 
-          <label className="mb-3 block font-semibold">
-            What does your group like?
-          </label>
+          <div className="mb-8">
+            <h3 className="text-2xl font-bold">
+              Build your group&apos;s TasteBridge
+            </h3>
 
-          <textarea
-            value={preferences}
-            onChange={(e) => setPreferences(e.target.value)}
-            placeholder="Example: One person loves jazz and Italian food, another loves indie films, Japanese food and art..."
-            className="h-32 w-full rounded-xl border border-slate-700 bg-slate-950 p-4 text-white outline-none placeholder:text-slate-500 focus:border-purple-500"
-          />
+            <p className="mt-2 text-sm text-slate-400">
+              Add each person&apos;s interests separately so TasteBridge can
+              understand both sides of the group.
+            </p>
+          </div>
 
-          <label className="mb-3 mt-7 block font-semibold">
-            What are you planning?
-          </label>
+          {/* People */}
+          <div className="grid gap-6 md:grid-cols-2">
 
-          <select
-            value={plan}
-            onChange={(e) => setPlan(e.target.value)}
-            className="w-full rounded-xl border border-slate-700 bg-slate-950 p-4 text-white outline-none focus:border-purple-500"
-          >
-            <option>Weekend Outing</option>
-            <option>Restaurant</option>
-            <option>Date Night</option>
-            <option>Travel</option>
-            <option>Entertainment</option>
-          </select>
+            <div>
+              <label className="mb-3 block font-semibold">
+                👤 Person 1 likes
+              </label>
+
+              <textarea
+                value={person1}
+                onChange={(e) => setPerson1(e.target.value)}
+                placeholder="Example: Italian food, jazz, museums, historic places..."
+                className="h-32 w-full rounded-xl border border-slate-700 bg-slate-950 p-4 text-white outline-none placeholder:text-slate-500 focus:border-purple-500"
+              />
+            </div>
+
+            <div>
+              <label className="mb-3 block font-semibold">
+                👤 Person 2 likes
+              </label>
+
+              <textarea
+                value={person2}
+                onChange={(e) => setPerson2(e.target.value)}
+                placeholder="Example: Japanese food, indie films, modern art..."
+                className="h-32 w-full rounded-xl border border-slate-700 bg-slate-950 p-4 text-white outline-none placeholder:text-slate-500 focus:border-purple-500"
+              />
+            </div>
+
+          </div>
+
+          {/* Location */}
+          <div className="mt-7">
+            <label className="mb-3 block font-semibold">
+              📍 Where are you looking?
+            </label>
+
+            <input
+              type="text"
+              value={location}
+              onChange={(e) => setLocation(e.target.value)}
+              placeholder="Example: London, Manchester, Birmingham..."
+              className="w-full rounded-xl border border-slate-700 bg-slate-950 p-4 text-white outline-none placeholder:text-slate-500 focus:border-purple-500"
+            />
+
+            <p className="mt-2 text-xs text-slate-500">
+              Optional for now. Location-aware recommendations will be enhanced
+              with live cultural intelligence.
+            </p>
+          </div>
+
+          {/* Planning */}
+          <div className="mt-7">
+            <label className="mb-3 block font-semibold">
+              🎯 What are you planning?
+            </label>
+
+            <select
+              value={plan}
+              onChange={(e) => setPlan(e.target.value)}
+              className="w-full rounded-xl border border-slate-700 bg-slate-950 p-4 text-white outline-none focus:border-purple-500"
+            >
+              <option>Weekend Outing</option>
+              <option>Restaurant</option>
+              <option>Date Night</option>
+              <option>Travel</option>
+              <option>Entertainment</option>
+              <option>Family Day</option>
+              <option>Team Outing</option>
+            </select>
+          </div>
 
           <button
             type="button"
             onClick={findTasteBridge}
             disabled={loading}
-            className="mt-7 w-full rounded-xl bg-purple-600 py-4 text-lg font-bold transition hover:bg-purple-500 disabled:cursor-not-allowed disabled:opacity-50"
+            className="mt-8 w-full rounded-xl bg-purple-600 py-4 text-lg font-bold transition hover:bg-purple-500 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {loading
-              ? "Finding your TasteBridge..."
+              ? "Finding the cultural connection..."
               : "✨ Find Our TasteBridge"}
           </button>
 
-          {/* Recommendation Result */}
-          {result && (
-            <div className="mt-6 rounded-xl border border-purple-500/30 bg-purple-500/10 p-5">
-
-              <p className="mb-2 text-xs uppercase tracking-widest text-purple-300">
-                TasteBridge Recommendation
-              </p>
-
-              <p className="leading-7 text-slate-200">
-                {result}
-              </p>
-
-              <p className="mt-4 text-xs text-slate-500">
-                Demo mode • Live Qloo cultural intelligence will be connected
-                when API access is available.
-              </p>
-
-            </div>
-          )}
         </section>
 
+        {/* Results */}
+        {showResult && (
+          <section className="mt-8 rounded-3xl border border-purple-500/30 bg-slate-900 p-6 md:p-8">
+
+            <div className="flex flex-wrap items-center justify-between gap-3">
+
+              <div>
+                <p className="text-xs uppercase tracking-widest text-purple-300">
+                  TasteBridge Recommendation
+                </p>
+
+                <h3 className="mt-2 text-2xl font-bold">
+                  Your shared cultural direction ✨
+                </h3>
+              </div>
+
+              <div className="rounded-full border border-amber-500/30 bg-amber-500/10 px-4 py-2 text-xs text-amber-300">
+                Demo Mode
+              </div>
+
+            </div>
+
+            <div className="mt-7 rounded-2xl border border-slate-700 bg-slate-950 p-6">
+
+              <p className="text-sm font-semibold text-blue-300">
+                Suggested direction
+              </p>
+
+              <p className="mt-3 text-lg leading-8 text-slate-200">
+                For your <strong>{plan}</strong>
+                {location.trim() ? (
+                  <>
+                    {" "}in <strong>{location}</strong>
+                  </>
+                ) : null}
+                , explore an experience that combines food, culture,
+                entertainment and discovery.
+              </p>
+
+            </div>
+
+            {/* Why it works */}
+            <div className="mt-6">
+
+              <h4 className="text-lg font-bold">
+                🧠 Why this could work for your group
+              </h4>
+
+              <div className="mt-4 grid gap-4 md:grid-cols-2">
+
+                <div className="rounded-2xl border border-slate-800 bg-slate-950 p-5">
+                  <p className="text-sm font-semibold text-purple-300">
+                    Person 1
+                  </p>
+
+                  <p className="mt-2 leading-7 text-slate-300">
+                    {person1}
+                  </p>
+                </div>
+
+                <div className="rounded-2xl border border-slate-800 bg-slate-950 p-5">
+                  <p className="text-sm font-semibold text-blue-300">
+                    Person 2
+                  </p>
+
+                  <p className="mt-2 leading-7 text-slate-300">
+                    {person2}
+                  </p>
+                </div>
+
+              </div>
+
+              <div className="mt-4 rounded-2xl border border-purple-500/20 bg-purple-500/10 p-5">
+
+                <p className="font-semibold text-purple-200">
+                  🔗 The TasteBridge
+                </p>
+
+                <p className="mt-2 leading-7 text-slate-300">
+                  TasteBridge looks for cultural relationships between both
+                  sets of interests instead of choosing one person&apos;s
+                  preferences over the other.
+                </p>
+
+              </div>
+
+            </div>
+
+            <p className="mt-6 text-xs leading-5 text-slate-500">
+              Demo mode • This prototype currently demonstrates the
+              TasteBridge experience. Live Qloo cultural intelligence will
+              replace the demo recommendation layer when API access is
+              connected.
+            </p>
+
+          </section>
+        )}
+
         {/* How it works */}
-        <section className="mt-16">
-          <h3 className="text-center text-2xl font-bold">
-            How TasteBridge works
-          </h3>
+        <section className="mt-20">
 
-          <div className="mt-8 grid gap-5 md:grid-cols-3">
+          <div className="text-center">
+            <p className="text-sm font-semibold uppercase tracking-widest text-purple-300">
+              From disagreement to discovery
+            </p>
+
+            <h3 className="mt-3 text-3xl font-bold">
+              How TasteBridge works
+            </h3>
+          </div>
+
+          <div className="mt-9 grid gap-5 md:grid-cols-3">
 
             <div className="rounded-2xl border border-slate-800 bg-slate-900 p-6">
-              <div className="mb-4 text-3xl">
-                👥
-              </div>
+              <div className="mb-4 text-3xl">👥</div>
 
               <h4 className="font-bold">
-                1. Share your tastes
+                1. Understand everyone
               </h4>
 
               <p className="mt-2 text-sm leading-6 text-slate-400">
-                Tell TasteBridge what different people in your group enjoy.
+                Capture each person&apos;s tastes separately instead of
+                blending everyone into one generic profile.
               </p>
             </div>
 
             <div className="rounded-2xl border border-slate-800 bg-slate-900 p-6">
-              <div className="mb-4 text-3xl">
-                🧠
-              </div>
+              <div className="mb-4 text-3xl">🧠</div>
 
               <h4 className="font-bold">
-                2. Find connections
+                2. Discover connections
               </h4>
 
               <p className="mt-2 text-sm leading-6 text-slate-400">
-                TasteBridge looks for cultural connections between different
-                interests.
+                Qloo cultural intelligence can reveal relationships across
+                food, music, film, travel and other interests.
               </p>
             </div>
 
             <div className="rounded-2xl border border-slate-800 bg-slate-900 p-6">
-              <div className="mb-4 text-3xl">
-                ✨
-              </div>
+              <div className="mb-4 text-3xl">✨</div>
 
               <h4 className="font-bold">
-                3. Get a shared idea
+                3. Bridge the tastes
               </h4>
 
               <p className="mt-2 text-sm leading-6 text-slate-400">
-                Receive a recommendation designed around the whole group.
+                Turn those connections into an experience designed to make
+                sense for the whole group.
               </p>
             </div>
 
           </div>
+
         </section>
 
         {/* Footer */}
-        <footer className="mt-16 border-t border-slate-800 py-8 text-center">
+        <footer className="mt-20 border-t border-slate-800 py-10 text-center">
 
-          <p className="text-sm text-slate-400">
-            TasteBridge AI
+          <p className="font-semibold">
+            TasteBridge <span className="text-purple-400">AI</span>
           </p>
 
-          <p className="mt-2 text-xs text-slate-500">
-            Powered by Qloo cultural intelligence
+          <p className="mt-2 text-sm text-slate-500">
+            Cultural intelligence for better group decisions
           </p>
 
         </footer>
