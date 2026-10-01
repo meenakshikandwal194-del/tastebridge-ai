@@ -2,36 +2,82 @@
 
 import { useState } from "react";
 
+type Recommendation = {
+  title: string;
+  summary: string;
+  person1Match: string;
+  person2Match: string;
+  bridge: string;
+};
+
 export default function Home() {
   const [person1, setPerson1] = useState("");
   const [person2, setPerson2] = useState("");
   const [location, setLocation] = useState("");
   const [plan, setPlan] = useState("Weekend Outing");
-  const [loading, setLoading] = useState(false);
-  const [showResult, setShowResult] = useState(false);
 
-  const findTasteBridge = () => {
+  const [recommendation, setRecommendation] =
+    useState<Recommendation | null>(null);
+
+  const [mode, setMode] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  const findTasteBridge = async () => {
     if (!person1.trim() || !person2.trim()) {
-      alert("Please enter tastes for both people.");
+      setError("Please enter tastes for both people.");
+      setRecommendation(null);
       return;
     }
 
     setLoading(true);
-    setShowResult(false);
+    setError("");
+    setRecommendation(null);
 
-    // Demo mode until live Qloo API access is connected.
-    setTimeout(() => {
+    try {
+      const response = await fetch("/api/recommend", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          person1,
+          person2,
+          location,
+          plan,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Unable to create a recommendation.");
+      }
+
+      if (!data.recommendation) {
+        throw new Error(
+          data.message || "Recommendation is not available right now."
+        );
+      }
+
+      setMode(data.mode || "");
+      setRecommendation(data.recommendation);
+    } catch (err) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError("Something went wrong. Please try again.");
+      }
+    } finally {
       setLoading(false);
-      setShowResult(true);
-    }, 800);
+    }
   };
 
   return (
     <main className="min-h-screen bg-slate-950 text-white">
       <div className="mx-auto max-w-5xl px-6 py-10">
-
         {/* Header */}
-        <header className="mb-20 flex items-center justify-between">
+        <header className="mb-20 flex items-center justify-between gap-5">
           <div>
             <h1 className="text-2xl font-bold">
               TasteBridge <span className="text-purple-400">AI</span>
@@ -42,7 +88,7 @@ export default function Home() {
             </p>
           </div>
 
-          <div className="rounded-full border border-purple-500/40 px-4 py-2 text-sm text-purple-300">
+          <div className="shrink-0 rounded-full border border-purple-500/40 px-4 py-2 text-sm text-purple-300">
             Powered by Qloo
           </div>
         </header>
@@ -65,9 +111,8 @@ export default function Home() {
           </p>
         </section>
 
-        {/* Main Form */}
+        {/* Form */}
         <section className="mt-14 rounded-3xl border border-slate-800 bg-slate-900 p-6 md:p-8">
-
           <div className="mb-8">
             <h3 className="text-2xl font-bold">
               Build your group&apos;s TasteBridge
@@ -79,9 +124,8 @@ export default function Home() {
             </p>
           </div>
 
-          {/* People */}
           <div className="grid gap-6 md:grid-cols-2">
-
+            {/* Person 1 */}
             <div>
               <label className="mb-3 block font-semibold">
                 👤 Person 1 likes
@@ -95,6 +139,7 @@ export default function Home() {
               />
             </div>
 
+            {/* Person 2 */}
             <div>
               <label className="mb-3 block font-semibold">
                 👤 Person 2 likes
@@ -107,7 +152,6 @@ export default function Home() {
                 className="h-32 w-full rounded-xl border border-slate-700 bg-slate-950 p-4 text-white outline-none placeholder:text-slate-500 focus:border-purple-500"
               />
             </div>
-
           </div>
 
           {/* Location */}
@@ -126,11 +170,11 @@ export default function Home() {
 
             <p className="mt-2 text-xs text-slate-500">
               Optional for now. Location-aware recommendations will be enhanced
-              with live cultural intelligence.
+              when live cultural intelligence is connected.
             </p>
           </div>
 
-          {/* Planning */}
+          {/* Plan */}
           <div className="mt-7">
             <label className="mb-3 block font-semibold">
               🎯 What are you planning?
@@ -151,6 +195,14 @@ export default function Home() {
             </select>
           </div>
 
+          {/* Error */}
+          {error && (
+            <div className="mt-6 rounded-xl border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-300">
+              {error}
+            </div>
+          )}
+
+          {/* Button */}
           <button
             type="button"
             onClick={findTasteBridge}
@@ -161,110 +213,93 @@ export default function Home() {
               ? "Finding the cultural connection..."
               : "✨ Find Our TasteBridge"}
           </button>
-
         </section>
 
-        {/* Results */}
-        {showResult && (
+        {/* Result */}
+        {recommendation && (
           <section className="mt-8 rounded-3xl border border-purple-500/30 bg-slate-900 p-6 md:p-8">
-
-            <div className="flex flex-wrap items-center justify-between gap-3">
-
+            <div className="flex flex-wrap items-center justify-between gap-4">
               <div>
                 <p className="text-xs uppercase tracking-widest text-purple-300">
                   TasteBridge Recommendation
                 </p>
 
                 <h3 className="mt-2 text-2xl font-bold">
-                  Your shared cultural direction ✨
+                  {recommendation.title} ✨
                 </h3>
               </div>
 
-              <div className="rounded-full border border-amber-500/30 bg-amber-500/10 px-4 py-2 text-xs text-amber-300">
-                Demo Mode
-              </div>
-
+              {mode === "demo" && (
+                <div className="rounded-full border border-amber-500/30 bg-amber-500/10 px-4 py-2 text-xs font-semibold text-amber-300">
+                  Demo Mode
+                </div>
+              )}
             </div>
 
+            {/* Main recommendation */}
             <div className="mt-7 rounded-2xl border border-slate-700 bg-slate-950 p-6">
-
               <p className="text-sm font-semibold text-blue-300">
-                Suggested direction
+                ⭐ Suggested direction
               </p>
 
               <p className="mt-3 text-lg leading-8 text-slate-200">
-                For your <strong>{plan}</strong>
-                {location.trim() ? (
-                  <>
-                    {" "}in <strong>{location}</strong>
-                  </>
-                ) : null}
-                , explore an experience that combines food, culture,
-                entertainment and discovery.
+                {recommendation.summary}
               </p>
-
             </div>
 
-            {/* Why it works */}
+            {/* Individual matches */}
             <div className="mt-6">
-
               <h4 className="text-lg font-bold">
                 🧠 Why this could work for your group
               </h4>
 
               <div className="mt-4 grid gap-4 md:grid-cols-2">
-
                 <div className="rounded-2xl border border-slate-800 bg-slate-950 p-5">
                   <p className="text-sm font-semibold text-purple-300">
-                    Person 1
+                    👤 Person 1
                   </p>
 
-                  <p className="mt-2 leading-7 text-slate-300">
-                    {person1}
+                  <p className="mt-3 leading-7 text-slate-300">
+                    {recommendation.person1Match}
                   </p>
                 </div>
 
                 <div className="rounded-2xl border border-slate-800 bg-slate-950 p-5">
                   <p className="text-sm font-semibold text-blue-300">
-                    Person 2
+                    👤 Person 2
                   </p>
 
-                  <p className="mt-2 leading-7 text-slate-300">
-                    {person2}
+                  <p className="mt-3 leading-7 text-slate-300">
+                    {recommendation.person2Match}
                   </p>
                 </div>
-
               </div>
-
-              <div className="mt-4 rounded-2xl border border-purple-500/20 bg-purple-500/10 p-5">
-
-                <p className="font-semibold text-purple-200">
-                  🔗 The TasteBridge
-                </p>
-
-                <p className="mt-2 leading-7 text-slate-300">
-                  TasteBridge looks for cultural relationships between both
-                  sets of interests instead of choosing one person&apos;s
-                  preferences over the other.
-                </p>
-
-              </div>
-
             </div>
 
-            <p className="mt-6 text-xs leading-5 text-slate-500">
-              Demo mode • This prototype currently demonstrates the
-              TasteBridge experience. Live Qloo cultural intelligence will
-              replace the demo recommendation layer when API access is
-              connected.
-            </p>
+            {/* Bridge */}
+            <div className="mt-5 rounded-2xl border border-purple-500/20 bg-purple-500/10 p-5">
+              <p className="font-semibold text-purple-200">
+                🔗 The Cultural Bridge
+              </p>
 
+              <p className="mt-2 leading-7 text-slate-300">
+                {recommendation.bridge}
+              </p>
+            </div>
+
+            {mode === "demo" && (
+              <p className="mt-6 text-xs leading-5 text-slate-500">
+                Demo mode • The recommendation currently comes from the
+                TasteBridge server-side demo layer. Live Qloo cultural
+                intelligence will replace this layer when API access is
+                connected.
+              </p>
+            )}
           </section>
         )}
 
         {/* How it works */}
         <section className="mt-20">
-
           <div className="text-center">
             <p className="text-sm font-semibold uppercase tracking-widest text-purple-300">
               From disagreement to discovery
@@ -276,13 +311,10 @@ export default function Home() {
           </div>
 
           <div className="mt-9 grid gap-5 md:grid-cols-3">
-
             <div className="rounded-2xl border border-slate-800 bg-slate-900 p-6">
               <div className="mb-4 text-3xl">👥</div>
 
-              <h4 className="font-bold">
-                1. Understand everyone
-              </h4>
+              <h4 className="font-bold">1. Understand everyone</h4>
 
               <p className="mt-2 text-sm leading-6 text-slate-400">
                 Capture each person&apos;s tastes separately instead of
@@ -293,9 +325,7 @@ export default function Home() {
             <div className="rounded-2xl border border-slate-800 bg-slate-900 p-6">
               <div className="mb-4 text-3xl">🧠</div>
 
-              <h4 className="font-bold">
-                2. Discover connections
-              </h4>
+              <h4 className="font-bold">2. Discover connections</h4>
 
               <p className="mt-2 text-sm leading-6 text-slate-400">
                 Qloo cultural intelligence can reveal relationships across
@@ -306,23 +336,26 @@ export default function Home() {
             <div className="rounded-2xl border border-slate-800 bg-slate-900 p-6">
               <div className="mb-4 text-3xl">✨</div>
 
-              <h4 className="font-bold">
-                3. Bridge the tastes
-              </h4>
+              <h4 className="font-bold">3. Bridge the tastes</h4>
 
               <p className="mt-2 text-sm leading-6 text-slate-400">
                 Turn those connections into an experience designed to make
                 sense for the whole group.
               </p>
             </div>
-
           </div>
+        </section>
 
+        {/* Backend status */}
+        <section className="mt-12 rounded-2xl border border-slate-800 bg-slate-900/60 p-5 text-center">
+          <p className="text-sm text-slate-400">
+            🔐 Recommendations are processed through a server-side API route.
+            Qloo credentials will remain protected from the browser.
+          </p>
         </section>
 
         {/* Footer */}
-        <footer className="mt-20 border-t border-slate-800 py-10 text-center">
-
+        <footer className="mt-16 border-t border-slate-800 py-10 text-center">
           <p className="font-semibold">
             TasteBridge <span className="text-purple-400">AI</span>
           </p>
@@ -330,9 +363,7 @@ export default function Home() {
           <p className="mt-2 text-sm text-slate-500">
             Cultural intelligence for better group decisions
           </p>
-
         </footer>
-
       </div>
     </main>
   );
