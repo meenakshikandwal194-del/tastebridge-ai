@@ -238,8 +238,7 @@ export async function POST(request: Request) {
     if (!qlooApiKey) {
       return NextResponse.json(
         {
-          error:
-            "Qloo API key is not configured on the server.",
+          error: "Qloo API key is not configured on the server.",
         },
         { status: 500 }
       );
@@ -352,7 +351,9 @@ export async function POST(request: Request) {
         ? Math.round(best.query.affinity * 100)
         : null;
 
-    const locationText = location ? ` in ${location}` : "";
+    const locationText = location
+      ? `, with ${location} as your planning context`
+      : "";
 
     return NextResponse.json({
       mode: "live",
