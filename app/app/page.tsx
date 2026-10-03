@@ -51,7 +51,9 @@ export default function Home() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || "Unable to create a recommendation.");
+        throw new Error(
+          data.error || "Unable to create a recommendation."
+        );
       }
 
       if (!data.recommendation) {
@@ -102,12 +104,15 @@ export default function Home() {
           <h2 className="text-4xl font-bold leading-tight md:text-6xl">
             Different tastes.
             <br />
-            <span className="text-blue-400">One shared experience.</span>
+            <span className="text-blue-400">
+              One shared experience.
+            </span>
           </h2>
 
           <p className="mx-auto mt-7 max-w-2xl text-lg leading-8 text-slate-400">
-            Tell TasteBridge what each person enjoys. We&apos;ll find the
-            cultural connection that can bring everyone together.
+            Tell TasteBridge what each person enjoys. We&apos;ll use
+            Qloo cultural intelligence to discover a shared connection
+            between their tastes.
           </p>
         </section>
 
@@ -119,8 +124,8 @@ export default function Home() {
             </h3>
 
             <p className="mt-2 text-sm text-slate-400">
-              Add each person&apos;s interests separately so TasteBridge can
-              understand both sides of the group.
+              Add each person&apos;s interests separately so TasteBridge
+              can understand both sides of the group.
             </p>
           </div>
 
@@ -169,8 +174,9 @@ export default function Home() {
             />
 
             <p className="mt-2 text-xs text-slate-500">
-              Optional for now. Location-aware recommendations will be enhanced
-              when live cultural intelligence is connected.
+              Optional context for your plan. Taste matching is powered
+              by Qloo cultural intelligence; recommendations are not
+              currently restricted to this location.
             </p>
           </div>
 
@@ -229,9 +235,9 @@ export default function Home() {
                 </h3>
               </div>
 
-              {mode === "demo" && (
-                <div className="rounded-full border border-amber-500/30 bg-amber-500/10 px-4 py-2 text-xs font-semibold text-amber-300">
-                  Demo Mode
+              {mode === "live" && (
+                <div className="rounded-full border border-emerald-500/30 bg-emerald-500/10 px-4 py-2 text-xs font-semibold text-emerald-300">
+                  ● Live Qloo Intelligence
                 </div>
               )}
             </div>
@@ -239,12 +245,20 @@ export default function Home() {
             {/* Main recommendation */}
             <div className="mt-7 rounded-2xl border border-slate-700 bg-slate-950 p-6">
               <p className="text-sm font-semibold text-blue-300">
-                ⭐ Suggested direction
+                ⭐ Suggested cultural match
               </p>
 
               <p className="mt-3 text-lg leading-8 text-slate-200">
                 {recommendation.summary}
               </p>
+
+              {location.trim() && (
+                <p className="mt-4 text-xs leading-5 text-slate-500">
+                  📍 You entered {location} as planning context. The
+                  cultural match above is based on Qloo taste signals
+                  and is not necessarily located in {location}.
+                </p>
+              )}
             </div>
 
             {/* Individual matches */}
@@ -287,13 +301,15 @@ export default function Home() {
               </p>
             </div>
 
-            {mode === "demo" && (
-              <p className="mt-6 text-xs leading-5 text-slate-500">
-                Demo mode • The recommendation currently comes from the
-                TasteBridge server-side demo layer. Live Qloo cultural
-                intelligence will replace this layer when API access is
-                connected.
-              </p>
+            {mode === "live" && (
+              <div className="mt-6 rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-4">
+                <p className="text-xs leading-5 text-emerald-200">
+                  ● Live Qloo Intelligence — TasteBridge resolves both
+                  people&apos;s interests into Qloo cultural tags and
+                  combines them as taste signals before requesting a
+                  recommendation from Qloo Insights.
+                </p>
+              </div>
             )}
           </section>
         )}
@@ -328,8 +344,9 @@ export default function Home() {
               <h4 className="font-bold">2. Discover connections</h4>
 
               <p className="mt-2 text-sm leading-6 text-slate-400">
-                Qloo cultural intelligence can reveal relationships across
-                food, music, film, travel and other interests.
+                TasteBridge resolves interests into Qloo cultural tags
+                and uses Qloo Insights to discover relationships across
+                different tastes.
               </p>
             </div>
 
@@ -339,18 +356,19 @@ export default function Home() {
               <h4 className="font-bold">3. Bridge the tastes</h4>
 
               <p className="mt-2 text-sm leading-6 text-slate-400">
-                Turn those connections into an experience designed to make
-                sense for the whole group.
+                Turn those cultural connections into a shared
+                recommendation designed for the whole group.
               </p>
             </div>
           </div>
         </section>
 
         {/* Backend status */}
-        <section className="mt-12 rounded-2xl border border-slate-800 bg-slate-900/60 p-5 text-center">
+        <section className="mt-12 rounded-2xl border border-emerald-500/20 bg-slate-900/60 p-5 text-center">
           <p className="text-sm text-slate-400">
-            🔐 Recommendations are processed through a server-side API route.
-            Qloo credentials will remain protected from the browser.
+            🔐 Live Qloo requests are processed through TasteBridge&apos;s
+            server-side API route. Your Qloo API credentials remain
+            protected from the browser.
           </p>
         </section>
 
@@ -361,7 +379,8 @@ export default function Home() {
           </p>
 
           <p className="mt-2 text-sm text-slate-500">
-            Cultural intelligence for better group decisions
+            Cultural intelligence for better group decisions • Powered
+            by Qloo
           </p>
         </footer>
       </div>
