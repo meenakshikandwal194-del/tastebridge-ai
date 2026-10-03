@@ -2,25 +2,35 @@
 
 ### Cultural Intelligence for Better Group Decisions
 
-TasteBridge AI is an AI-powered group recommendation experience designed to help people with different tastes find experiences they can enjoy together.
+**TasteBridge AI** helps two people with different tastes discover a shared cultural experience they may both enjoy.
 
 Instead of asking:
 
-> "Where should we go?"
+> "What does one person like?"
 
 TasteBridge asks:
 
-> "What would work for all of us?"
+> **"What could we both enjoy together?"**
 
-The project is being developed for the **Qloo Hackathon** and is designed around Qloo's cultural intelligence capabilities.
+Built for the **Qloo Hackathon**, TasteBridge uses live Qloo cultural intelligence to translate different interests into shared taste signals and generate a recommendation.
+
+---
+
+## 🚀 Live Demo
+
+**Production App:**  
+https://tastebridge-ai.vercel.app
+
+**GitHub Repository:**  
+https://github.com/meenakshikandwal194-del/tastebridge-ai
 
 ---
 
 ## 💡 The Problem
 
-Choosing something as a group is surprisingly difficult.
+Group decisions can be surprisingly difficult.
 
-One person may love:
+One person might enjoy:
 
 - Italian food
 - Jazz
@@ -32,187 +42,332 @@ while another prefers:
 - Indie films
 - Modern art
 
-Traditional recommendation systems usually optimise for one person's preferences or a single category.
+Traditional recommendation experiences often start from one person's preferences or focus on a single category.
 
-TasteBridge AI approaches the problem differently.
-
-It looks for the **cultural bridge between different preferences** and turns them into a shared recommendation.
+TasteBridge takes a different approach: it looks for a **cultural bridge between different tastes** and uses those combined signals to suggest something the group can explore together.
 
 ---
 
 ## ✨ The Solution
 
-Users describe the interests of the people in their group and select what they are planning.
+Users provide:
 
-TasteBridge then uses those preferences to create a culturally relevant shared direction.
+1. Person 1's interests
+2. Person 2's interests
+3. An optional location as planning context
+4. What they are planning
 
-Example:
+For example:
 
-**Person 1**
+```text
+Person 1:
+Jazz
 
-Italian food, jazz and museums.
+Person 2:
+Indie Film Screenings
 
-**Person 2**
+Location:
+Manchester
 
-Japanese food, indie films and modern art.
+Plan:
+Travel
+```
 
-**Planning**
+TasteBridge resolves the interests into Qloo cultural tags, combines those taste signals, and queries Qloo for a shared recommendation.
 
-Weekend Outing
+A live test can, for example, return a destination such as **Shanghai** with a Qloo taste-affinity signal.
 
-TasteBridge can identify overlapping cultural signals and recommend experiences that have a better chance of appealing to the whole group.
-
----
-
-## 🚀 Use Cases
-
-TasteBridge can support decisions for:
-
-- 💕 Date nights
-- 👨‍👩‍👧 Family outings
-- 🧑‍🤝‍🧑 Friend groups
-- ✈️ Travel planning
-- 🍽️ Restaurant discovery
-- 🎵 Music and entertainment
-- 🎨 Arts and cultural experiences
-- 🏢 Team outings
+The location field currently provides **planning context**. Recommendations are not yet geographically restricted to the entered location.
 
 ---
 
 ## 🧠 How TasteBridge Works
 
-### 1. Understand the Group
+### 1. Collect Interests
 
-Users describe each person's interests in natural language.
+Each person enters interests in natural language.
 
-Example:
-
-```text
-Person 1 loves Italian food, jazz and museums.
-Person 2 loves Japanese food, indie films and modern art.
-```
-
-### 2. Understand the Occasion
-
-The user selects what they are planning, such as:
+Examples:
 
 ```text
-Weekend Outing
-Date Night
-Family Day
-Travel
-Food & Drinks
-Entertainment
+Jazz, Italian Food, Museums
 ```
 
-### 3. Discover Cultural Connections
+and:
 
-TasteBridge is designed to use **Qloo cultural intelligence** to explore relationships between interests across categories.
+```text
+Indie Film Screenings, Modern Art, Japanese Food
+```
 
-### 4. Build a Shared Recommendation
+### 2. Resolve Interests with Qloo
 
-The application converts those signals into a recommendation designed around the group's combined tastes rather than one person's preferences.
+The server searches Qloo's tag system for each entered interest.
+
+TasteBridge uses Qloo's tag endpoint to translate human-readable interests into Qloo cultural tag identifiers.
+
+Conceptually:
+
+```text
+"Jazz"
+   ↓
+Qloo tag lookup
+   ↓
+Qloo cultural tag ID
+```
+
+### 3. Combine Taste Signals
+
+Tags resolved for both people are combined into a shared set of cultural signals.
+
+```text
+Person 1 interests ──┐
+                     ├──> Combined taste signals
+Person 2 interests ──┘
+```
+
+### 4. Query Qloo Insights
+
+TasteBridge sends the combined tag signals to Qloo's Insights API.
+
+The requested Qloo entity type changes according to the selected planning context. This allows TasteBridge to explore different kinds of cultural recommendations.
+
+### 5. Build the TasteBridge
+
+The returned Qloo entities are processed and the strongest available recommendation is presented to the users along with its affinity signal when available.
+
+The interface also explains how the two people's preferences contributed to the result.
+
+---
+
+## 🔌 Live Qloo Integration
+
+TasteBridge uses the **Qloo Hackathon API environment**.
+
+The current integration uses:
+
+```text
+GET /v2/tags
+```
+
+to resolve user-entered interests into Qloo cultural tags, followed by:
+
+```text
+GET /v2/insights
+```
+
+to discover recommendations from the combined taste signals.
+
+Simplified flow:
+
+```text
+User Interests
+      │
+      ▼
+TasteBridge Next.js UI
+      │
+      ▼
+POST /api/recommend
+      │
+      ▼
+Qloo /v2/tags
+      │
+      ▼
+Resolved Cultural Tags
+      │
+      ▼
+Combined Taste Signals
+      │
+      ▼
+Qloo /v2/insights
+      │
+      ▼
+Affinity-Based Cultural Result
+      │
+      ▼
+TasteBridge Recommendation
+```
+
+This is a **live Qloo integration**, not a static or hard-coded recommendation demo.
 
 ---
 
 ## 🏗️ Architecture
 
 ```text
-Users
-  │
-  ▼
-TasteBridge AI Interface
-  │
-  ▼
-Next.js Application
-  │
-  ▼
-Preference + Occasion Processing
-  │
-  ▼
-Qloo Cultural Intelligence
-  │
-  ▼
-Cross-Domain Taste Signals
-  │
-  ▼
-Shared Group Recommendation
+┌──────────────────────────────┐
+│            Users             │
+│                              │
+│ Person 1 tastes              │
+│ Person 2 tastes              │
+│ Location context             │
+│ Planning type                │
+└──────────────┬───────────────┘
+               │
+               ▼
+┌──────────────────────────────┐
+│      Next.js / React UI      │
+└──────────────┬───────────────┘
+               │
+               │ POST /api/recommend
+               ▼
+┌──────────────────────────────┐
+│   TasteBridge Server Route   │
+│                              │
+│ • Parse interests            │
+│ • Resolve tags               │
+│ • Combine signals            │
+│ • Select target entity type  │
+└──────────────┬───────────────┘
+               │
+               ▼
+┌──────────────────────────────┐
+│          Qloo API            │
+│                              │
+│ /v2/tags                     │
+│       ↓                      │
+│ /v2/insights                 │
+└──────────────┬───────────────┘
+               │
+               ▼
+┌──────────────────────────────┐
+│ Shared Cultural Match        │
+│ + Taste Affinity             │
+│ + Cultural Bridge            │
+└──────────────────────────────┘
 ```
+
+---
+
+## 🎯 Planning Modes
+
+The interface supports several types of group decisions, including:
+
+- 💕 Date Night
+- 👨‍👩‍👧 Family activities
+- 🧑‍🤝‍🧑 Group outings
+- ✈️ Travel
+- 🍽️ Food-related experiences
+- 🎵 Entertainment
+- 🎨 Cultural experiences
+- 🏢 Team activities
+
+Different planning modes can guide TasteBridge toward different Qloo entity types.
+
+---
+
+## 🖥️ Current Features
+
+TasteBridge currently includes:
+
+- ✅ Live Qloo API integration
+- ✅ Two-person preference input
+- ✅ Natural-language interest entry
+- ✅ Qloo cultural tag resolution
+- ✅ Combined group taste signals
+- ✅ Qloo Insights recommendations
+- ✅ Affinity-based result selection
+- ✅ Multiple planning contexts
+- ✅ Optional location planning context
+- ✅ Explanation of each person's matched interests
+- ✅ Cultural Bridge explanation
+- ✅ Server-side API credential handling
+- ✅ Responsive dark interface
+- ✅ Production deployment on Vercel
+- ✅ GitHub-based deployment workflow
 
 ---
 
 ## 🛠️ Technology Stack
 
-**Frontend**
+### Frontend
 
 - Next.js
 - React
 - TypeScript
 - Tailwind CSS
 
-**Cultural Intelligence**
+### Backend
 
-- Qloo API / Qloo Hackathon environment
+- Next.js Route Handler
+- TypeScript
+- Server-side Qloo API requests
 
-**Development**
+### Cultural Intelligence
+
+- Qloo API
+- Qloo Tags
+- Qloo Insights API
+- Qloo affinity signals
+
+### Development & Deployment
 
 - Node.js
 - npm
 - Git
 - GitHub
 - Visual Studio Code
+- Vercel
 
 ---
 
-## 🔌 Qloo Integration
+## 🔐 Security
 
-TasteBridge is designed around Qloo's cultural intelligence layer.
+The Qloo API key is never exposed in the browser.
 
-Qloo can help identify relationships between cultural preferences across areas such as food, music, entertainment, travel and other lifestyle interests.
+Qloo requests are made from the server-side Next.js API route:
 
-The application is currently able to run in a demo/learning mode while Qloo API credentials are unavailable.
+```text
+/api/recommend
+```
 
-Once API access is available, the live Qloo integration can replace the demo recommendation layer without changing the core user experience.
+Credentials are supplied through environment variables.
 
-> **Security:** API credentials must never be committed to this repository. Local credentials should be stored using environment variables such as `.env.local`.
+The API key must **never be committed to GitHub**.
 
----
-
-## 🖥️ Current Prototype
-
-The current prototype includes:
-
-- Group preference input
-- Occasion selection
-- TasteBridge recommendation interface
-- Responsive dark UI
-- Demo recommendation flow
-- Qloo-focused architecture
-- Support for future live API integration
+The local `.env.local` file is excluded from source control.
 
 ---
 
 ## ⚙️ Run Locally
 
-Clone the repository:
+### 1. Clone the repository
 
 ```bash
 git clone https://github.com/meenakshikandwal194-del/tastebridge-ai.git
 ```
 
-Enter the project:
+### 2. Enter the Next.js application
 
 ```bash
 cd tastebridge-ai/app
 ```
 
-Install dependencies:
+### 3. Install dependencies
 
 ```bash
 npm install
 ```
 
-Start the development server:
+### 4. Configure environment variables
+
+Create:
+
+```text
+.env.local
+```
+
+inside the `app` directory.
+
+Add:
+
+```text
+QLOO_API_KEY=your_qloo_api_key
+QLOO_BASE_URL=https://hackathon.api.qloo.com
+```
+
+Do not commit the real API key.
+
+### 5. Start the development server
 
 ```bash
 npm run dev
@@ -226,39 +381,97 @@ http://localhost:3000
 
 ---
 
-## 🔐 Environment Variables
+## ☁️ Production Deployment
 
-When Qloo API access is available, create:
+TasteBridge is deployed on **Vercel**.
 
-```text
-app/.env.local
-```
-
-Environment variables should be stored locally and must not be committed to GitHub.
-
-Example structure:
+Production:
 
 ```text
-QLOO_API_KEY=your_api_key_here
-QLOO_BASE_URL=your_qloo_api_base_url
+https://tastebridge-ai.vercel.app
 ```
+
+The production deployment uses server-side Vercel environment variables for:
+
+```text
+QLOO_API_KEY
+QLOO_BASE_URL
+```
+
+The GitHub `main` branch is connected to the Vercel project, allowing new commits to trigger production deployments.
 
 ---
 
-## 🗺️ Roadmap
+## 📍 Location Behaviour
 
-Planned improvements include:
+Location is currently treated as **planning context** rather than a strict geographic filter.
 
-- Live Qloo API integration
-- More detailed group preference modelling
-- Cross-category recommendations
-- Location-aware discovery
-- Restaurant and entertainment recommendations
-- Travel recommendations
-- Recommendation explanations
-- Group preference comparison
-- Improved result cards
-- Production deployment
+For example, if a user enters:
+
+```text
+Manchester
+```
+
+TasteBridge may still return a culturally relevant destination or experience outside Manchester.
+
+The interface explicitly communicates this behaviour so that the recommendation is not presented as a local-search result.
+
+---
+
+## 🧪 Example
+
+Input:
+
+```text
+Person 1:
+Jazz
+
+Person 2:
+Indie Film Screenings
+
+Location:
+Manchester
+
+Planning:
+Travel
+```
+
+TasteBridge:
+
+```text
+Jazz
+        ┐
+        ├──> Qloo cultural tags
+Indie   ┘
+Film
+        ↓
+Combined taste signals
+        ↓
+Qloo Insights
+        ↓
+Shared cultural recommendation
+```
+
+The production application displays the resulting cultural match together with the Qloo affinity signal when available.
+
+Because Qloo data is queried live, results may vary.
+
+---
+
+## 🗺️ Future Improvements
+
+Potential next steps include:
+
+- Location-aware Qloo discovery
+- Interest autocomplete and suggestions
+- Location autocomplete
+- Support for larger groups
+- Richer recommendation explanations
+- Multiple recommendation options
+- Saved group taste profiles
+- More cross-category exploration
+- Improved error and empty-result handling
+- Recommendation images and richer result cards
 
 ---
 
@@ -266,13 +479,13 @@ Planned improvements include:
 
 Most recommendation systems ask:
 
-**"What do you like?"**
+> **"What do you like?"**
 
 TasteBridge asks:
 
-**"What could we all like together?"**
+> **"What could we all like together?"**
 
-The goal is to make group decision-making easier by using cultural intelligence to discover connections between people whose tastes may initially appear very different.
+TasteBridge explores how cultural intelligence can make group decision-making easier by discovering connections between people whose tastes initially appear different.
 
 ---
 
@@ -280,7 +493,7 @@ The goal is to make group decision-making easier by using cultural intelligence 
 
 **Meenakshi**
 
-Built as a hackathon project exploring how cultural intelligence can improve group recommendations.
+Built for the **Qloo Hackathon** as an exploration of group recommendations powered by cultural intelligence.
 
 ---
 
