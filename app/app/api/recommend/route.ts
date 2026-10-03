@@ -88,6 +88,10 @@ function collectEntities(
   return output;
 }
 
+function wait(milliseconds: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, milliseconds));
+}
+
 async function findTag(
   interest: string,
   apiKey: string
@@ -184,26 +188,66 @@ async function getSharedInsights(
   // Multiple shared taste signals are supplied together.
   url.searchParams.set("signal.interests.tags", tagIds.join(","));
 
-  const response = await fetch(url, {
-    method: "GET",
-    headers: {
-      "X-Api-Key": apiKey,
-      Accept: "application/json",
-    },
-    cache: "no-store",
-  });
+  const maxAttempts = 3;
 
-  if (!response.ok) {
-    const message = await response.text();
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    try {
+      console.log(
+        `Qloo Insights request attempt ${attempt}/${maxAttempts}`
+      );
 
-    console.error("Qloo Insights error:", response.status, message);
+      const response = await fetch(url, {
+        method: "GET",
+        headers: {
+          "X-Api-Key": apiKey,
+          Accept: "application/json",
+        },
+        cache: "no-store",
+      });
 
-    throw new Error(`Qloo Insights returned ${response.status}.`);
+      if (response.ok) {
+        const data: unknown = await response.json();
+
+        return collectEntities(data);
+      }
+
+      const message = await response.text();
+
+      console.error(
+        `Qloo Insights attempt ${attempt} failed:`,
+        response.status,
+        message
+      );
+
+      const retryableStatuses = [502, 503, 504];
+
+      const shouldRetry =
+        retryableStatuses.includes(response.status) &&
+        attempt < maxAttempts;
+
+      if (!shouldRetry) {
+        throw new Error(`Qloo Insights returned ${response.status}.`);
+      }
+
+      // Short increasing delay before retrying:
+      // attempt 1 -> 700 ms
+      // attempt 2 -> 1400 ms
+      await wait(700 * attempt);
+    } catch (error) {
+      if (attempt === maxAttempts) {
+        throw error;
+      }
+
+      console.error(
+        `Qloo Insights network error on attempt ${attempt}:`,
+        error
+      );
+
+      await wait(700 * attempt);
+    }
   }
 
-  const data: unknown = await response.json();
-
-  return collectEntities(data);
+  throw new Error("Qloo Insights failed after all retry attempts.");
 }
 
 export async function POST(request: Request) {
@@ -277,6 +321,7 @@ export async function POST(request: Request) {
         ...person1Tags
           .map((tag) => tag.id)
           .filter((id): id is string => Boolean(id)),
+
         ...person2Tags
           .map((tag) => tag.id)
           .filter((id): id is string => Boolean(id)),
@@ -287,7 +332,11 @@ export async function POST(request: Request) {
 
     /*
       STEP 3:
-      Ask Qloo Insights for entities connected to the combined taste profile.
+      Ask Qloo Insights for entities connected to the
+      combined taste profile.
+
+      Temporary Qloo gateway errors (502/503/504)
+      are automatically retried.
     */
 
     const entities = await getSharedInsights(
@@ -307,7 +356,8 @@ export async function POST(request: Request) {
     }
 
     /*
-      Remove duplicate entities and use the highest-affinity result available.
+      Remove duplicate entities and use the
+      highest-affinity result available.
     */
 
     const uniqueEntities = Array.from(
@@ -357,6 +407,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({
       mode: "live",
+
       recommendation: {
         title: best.name,
 
